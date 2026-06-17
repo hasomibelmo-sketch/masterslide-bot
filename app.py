@@ -1,0 +1,66 @@
+from flask import Flask, request
+import requests
+import google.generativeai as genai
+import os
+
+app = Flask(__name__)
+
+VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+def get_ai_response(text):
+    try:
+        response = model.generate_content(f"أنت مساعد ذكي لحساب ماستر سلايد على إنستغرام. رد باختصار وبشكل ودي على: {text}")
+        return response.text
+    except:
+        return "شكراً على تواصلك معنا! سنرد عليك قريباً 😊"
+
+@app.route("/webhook", methods=["GET"])
+def verify():
+    if request.args.get("hub.verify_token") == VERIFY_TOKEN:
+        return request.args.get("hub.challenge")
+    return "خطأ", 403
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.json
+    for entry in data.get("entry", []):
+        for msg in entry.get("messaging", []):
+            sender_id = msg["sender"]["id"]
+            if "message" in msg and "text" in msg["message"]:
+                text = msg["message"]["text"]
+                reply = get_ai_response(text)
+                send_dm(sender_id, reply)
+        for change in entry.get("changes", []):
+            value = change.get("value", {})
+            if change.get("field") == "comments":
+                comment_id = value.get("id")
+                comment_text = value.get("text", "")
+                reply = get_ai_response(comment_text)
+                reply_comment(comment_id, reply)
+    return "OK", 200
+
+def send_dm(recipient_id, message):
+    url = "https://graph.facebook.com/v19.0/me/messages"
+    payload = {
+        "recipient": {"id": recipient_id},
+        "message": {"text": message},
+        "access_token": ACCESS_TOKEN
+    }
+    requests.post(url, json=payload)
+
+def reply_comment(comment_id, message):
+    url = f"https://graph.facebook.com/v19.0/{comment_id}/replies"
+    payload = {
+        "message": message,
+        "access_token": ACCESS_TOKEN
+    }
+    requests.post(url, json=payload)
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
