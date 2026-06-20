@@ -15,7 +15,7 @@ ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
-MODEL_NAME = "gemini-flash-latest"
+MODEL_NAME = "gemini-3-flash"
 
 
 def get_ai_response(text):
@@ -90,6 +90,12 @@ def reply_comment(comment_id, message):
         "message": message
     }
     resp = requests.post(url, headers=headers, data=payload)
+    logger.info(f"reply_comment status={resp.status_code} body={resp.text}")
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)= requests.post(url, headers=headers, data=payload)
     logger.info(f"reply_comment status={resp.status_code} body={resp.text}")
 
 
