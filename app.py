@@ -95,10 +95,4 @@ def reply_comment(comment_id, message):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)= requests.post(url, headers=headers, data=payload)
-    logger.info(f"reply_comment status={resp.status_code} body={resp.text}")
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
