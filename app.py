@@ -64,24 +64,32 @@ def webhook():
     return "OK", 200
 
 
+IG_ID = os.environ.get("IG_ID")  # Instagram Business Account ID: 17841480087963888
+
+
 def send_dm(recipient_id, message):
-    url = "https://graph.facebook.com/v19.0/me/messages"
+    url = f"https://graph.instagram.com/v25.0/{IG_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
     payload = {
         "recipient": {"id": recipient_id},
-        "message": {"text": message},
-        "access_token": ACCESS_TOKEN
+        "message": {"text": message}
     }
-    resp = requests.post(url, json=payload)
+    resp = requests.post(url, headers=headers, json=payload)
     logger.info(f"send_dm status={resp.status_code} body={resp.text}")
 
 
 def reply_comment(comment_id, message):
-    url = f"https://graph.facebook.com/v19.0/{comment_id}/replies"
-    payload = {
-        "message": message,
-        "access_token": ACCESS_TOKEN
+    url = f"https://graph.facebook.com/v21.0/{comment_id}/replies"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}"
     }
-    resp = requests.post(url, json=payload)
+    payload = {
+        "message": message
+    }
+    resp = requests.post(url, headers=headers, data=payload)
     logger.info(f"reply_comment status={resp.status_code} body={resp.text}")
 
 
