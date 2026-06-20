@@ -15,7 +15,7 @@ ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
-MODEL_NAME = "gemini-3-flash"
+MODEL_NAME = "gemini-flash-latest"
 
 
 def get_ai_response(text):
